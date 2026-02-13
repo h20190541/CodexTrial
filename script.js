@@ -1,12 +1,4 @@
-const button = document.getElementById('recommendButton');
-const stockDataInput = document.getElementById('stockData');
-const summaryText = document.getElementById('summaryText');
-const buyList = document.getElementById('buyList');
-const resultsTableBody = document.getElementById('resultsTableBody');
-
-const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
-
-const numericFields = [
+const inputIds = [
   'trendStrength',
   'volatility',
   'newsSentiment',
@@ -21,34 +13,19 @@ const numericFields = [
   'roe',
 ];
 
-function parseCsvLine(line) {
-  const parts = line.split(',').map((part) => part.trim());
-  if (parts.length !== 13) {
-    return null;
+const button = document.getElementById('recommendButton');
+const recommendationText = document.getElementById('recommendationText');
+const scoreText = document.getElementById('scoreText');
+const reasonList = document.getElementById('reasonList');
+
+const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
+function readInputs() {
+  const values = {};
+  for (const id of inputIds) {
+    const parsed = Number.parseFloat(document.getElementById(id).value);
+    values[id] = Number.isFinite(parsed) ? parsed : 0;
   }
-
-  const stock = parts[0];
-  const values = {
-    stock,
-    trendStrength: Number.parseFloat(parts[1]),
-    volatility: Number.parseFloat(parts[2]),
-    newsSentiment: Number.parseFloat(parts[3]),
-    sectorMomentum: Number.parseFloat(parts[4]),
-    rsi: Number.parseFloat(parts[5]),
-    dmaGap: Number.parseFloat(parts[6]),
-    macd: Number.parseFloat(parts[7]),
-    volume: Number.parseFloat(parts[8]),
-    revenueGrowth: Number.parseFloat(parts[9]),
-    earningsGrowth: Number.parseFloat(parts[10]),
-    debtEquity: Number.parseFloat(parts[11]),
-    roe: Number.parseFloat(parts[12]),
-  };
-
-  const hasInvalidNumber = numericFields.some((field) => !Number.isFinite(values[field]));
-  if (!stock || hasInvalidNumber) {
-    return null;
-  }
-
   return values;
 }
 
@@ -77,27 +54,24 @@ function computeScore(v) {
 function buildReasons(v) {
   const reasons = [];
   if (v.trendStrength > 60 && v.sectorMomentum > 55) {
-    reasons.push('Strong market and sector momentum.');
+    reasons.push('Market and sector momentum are supportive for upside continuation.');
   }
   if (v.volatility > 70) {
-    reasons.push('High volatility risk.');
+    reasons.push('High volatility increases risk and can invalidate setups quickly.');
   }
   if (v.rsi > 70) {
-    reasons.push('RSI overbought warning.');
+    reasons.push('RSI is overbought, so near-term pullback risk is elevated.');
   } else if (v.rsi < 30) {
-    reasons.push('RSI oversold rebound setup.');
+    reasons.push('RSI is oversold, indicating possible rebound conditions.');
   }
   if (v.revenueGrowth > 10 && v.earningsGrowth > 10) {
-    reasons.push('Strong revenue and earnings growth.');
+    reasons.push('Strong revenue and earnings growth suggest healthy business momentum.');
   }
   if (v.debtEquity > 2) {
-    reasons.push('Elevated debt-to-equity.');
+    reasons.push('Debt-to-equity is elevated, which may pressure valuation and risk.');
   }
   if (v.roe > 15) {
-    reasons.push('Healthy return on equity.');
-  }
-  if (reasons.length === 0) {
-    reasons.push('No dominant factor detected.');
+    reasons.push('Return on equity indicates efficient capital utilization.');
   }
   return reasons;
 }
@@ -112,62 +86,26 @@ function recommendationFromScore(score) {
   return { label: 'SELL / AVOID', className: 'sell' };
 }
 
-function renderResults(results) {
-  const buyCandidates = results.filter((entry) => entry.signal.label === 'BUY');
-  summaryText.textContent = `Processed ${results.length} stocks. Found ${buyCandidates.length} buy candidate(s).`;
-
-  buyList.innerHTML = '';
-  if (buyCandidates.length === 0) {
-    const item = document.createElement('li');
-    item.textContent = 'No BUY signals in the provided list.';
-    buyList.appendChild(item);
-  } else {
-    buyCandidates.forEach((entry) => {
-      const item = document.createElement('li');
-      item.innerHTML = `<strong>${entry.stock}</strong> — score ${entry.score.toFixed(1)} (${entry.reasons[0]})`;
-      buyList.appendChild(item);
-    });
-  }
-
-  resultsTableBody.innerHTML = '';
-  results.forEach((entry) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${entry.stock}</td>
-      <td>${entry.score.toFixed(1)}</td>
-      <td><span class="tag ${entry.signal.className}">${entry.signal.label}</span></td>
-      <td>${entry.reasons[0]}</td>
-    `;
-    resultsTableBody.appendChild(row);
-  });
-}
-
 button.addEventListener('click', () => {
-  const lines = stockDataInput.value
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const values = readInputs();
+  const score = computeScore(values);
+  const reasons = buildReasons(values);
+  const { label, className } = recommendationFromScore(score);
 
-  const parsedStocks = lines.map(parseCsvLine).filter(Boolean);
+  recommendationText.innerHTML = `Signal: <span class="tag ${className}">${label}</span>`;
+  scoreText.textContent = `Composite score: ${score.toFixed(1)} / 100+`;
+  reasonList.innerHTML = '';
 
-  if (parsedStocks.length === 0) {
-    summaryText.textContent = 'No valid rows found. Please provide CSV rows in the expected format.';
-    buyList.innerHTML = '';
-    resultsTableBody.innerHTML = '';
+  if (reasons.length === 0) {
+    const item = document.createElement('li');
+    item.textContent = 'No dominant factor detected; consider collecting more data.';
+    reasonList.appendChild(item);
     return;
   }
 
-  const results = parsedStocks
-    .map((stockValues) => {
-      const score = computeScore(stockValues);
-      return {
-        stock: stockValues.stock,
-        score,
-        signal: recommendationFromScore(score),
-        reasons: buildReasons(stockValues),
-      };
-    })
-    .sort((a, b) => b.score - a.score);
-
-  renderResults(results);
+  reasons.forEach((reason) => {
+    const item = document.createElement('li');
+    item.textContent = reason;
+    reasonList.appendChild(item);
+  });
 });
