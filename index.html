@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Stock Recommendation Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Stock Recommendation Studio</h1>
+        <p>
+          Analyze multiple stocks locally and get a filtered list of buy candidates
+          using trend, technical, and financial signals.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Stock Universe Input (CSV)</h2>
+        <p class="help-text">
+          One stock per line: <code>Stock,TrendStrength,Volatility,NewsSentiment,SectorMomentum,RSI,DmaGap,MACD,Volume,RevenueGrowth,EarningsGrowth,DebtEquity,ROE</code>
+        </p>
+        <textarea id="stockData" rows="8" spellcheck="false">AAPL,78,35,22,74,56,9,21,72,11,14,1.5,26
+MSFT,74,31,18,69,52,8,17,70,13,16,0.7,31
+TSLA,62,78,-5,58,71,3,8,64,9,6,2.4,19
+INTC,48,42,-12,45,44,-2,-10,49,-4,-7,1.1,7</textarea>
+      </section>
+
+      <section class="card controls">
+        <button id="recommendButton">Generate Recommendations</button>
+        <p class="disclaimer">
+          This tool is educational and not financial advice. Always perform your
+          own due diligence.
+        </p>
+      </section>
+
+      <section class="card result" id="resultPanel" aria-live="polite">
+        <h2>Buy Candidates</h2>
+        <p id="summaryText">No recommendation generated yet.</p>
+        <ul id="buyList"></ul>
+      </section>
+
+      <section class="card result" id="allResultsPanel" aria-live="polite">
+        <h2>All Stock Scores</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Score</th>
+                <th>Signal</th>
+                <th>Top Reason</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
