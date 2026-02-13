@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Stock Recommendation Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Stock Recommendation Studio</h1>
+        <p>
+          Enter market trend, technical, and financial inputs to get a local
+          buy/hold/sell recommendation.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Market Trend Signals</h2>
+        <div class="grid two-col">
+          <label>
+            Trend Strength (0-100)
+            <input type="number" id="trendStrength" min="0" max="100" value="65" />
+          </label>
+          <label>
+            Volatility (0-100)
+            <input type="number" id="volatility" min="0" max="100" value="40" />
+          </label>
+          <label>
+            News Sentiment (-100 to 100)
+            <input type="number" id="newsSentiment" min="-100" max="100" value="20" />
+          </label>
+          <label>
+            Sector Momentum (0-100)
+            <input type="number" id="sectorMomentum" min="0" max="100" value="60" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Technical Indicators</h2>
+        <div class="grid two-col">
+          <label>
+            RSI (0-100)
+            <input type="number" id="rsi" min="0" max="100" value="54" />
+          </label>
+          <label>
+            Price vs 200-DMA (%)
+            <input type="number" id="dmaGap" min="-50" max="50" value="8" />
+          </label>
+          <label>
+            MACD Signal (-100 to 100)
+            <input type="number" id="macd" min="-100" max="100" value="18" />
+          </label>
+          <label>
+            Volume Confirmation (0-100)
+            <input type="number" id="volume" min="0" max="100" value="68" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Financial Health</h2>
+        <div class="grid two-col">
+          <label>
+            Revenue Growth YoY (%)
+            <input type="number" id="revenueGrowth" min="-100" max="200" value="14" />
+          </label>
+          <label>
+            Earnings Growth YoY (%)
+            <input type="number" id="earningsGrowth" min="-100" max="200" value="12" />
+          </label>
+          <label>
+            Debt-to-Equity Ratio
+            <input type="number" id="debtEquity" min="0" max="10" step="0.01" value="0.85" />
+          </label>
+          <label>
+            Return on Equity (%)
+            <input type="number" id="roe" min="-100" max="100" value="18" />
+          </label>
+        </div>
+      </section>
+
+      <section class="card controls">
+        <button id="recommendButton">Generate Recommendation</button>
+        <p class="disclaimer">
+          This tool is educational and not financial advice. Always perform your
+          own due diligence.
+        </p>
+      </section>
+
+      <section class="card result" id="resultPanel" aria-live="polite">
+        <h2>Recommendation</h2>
+        <p id="recommendationText">No recommendation generated yet.</p>
+        <p id="scoreText">Composite score: —</p>
+        <ul id="reasonList"></ul>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
